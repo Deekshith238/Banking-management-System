@@ -50,21 +50,22 @@ CREATE TABLE transactions (
 );
 
 -- ---------------------------------------------------------
--- Sample Seed Data
+-- Sample Seed Data (Indian Context)
 -- ---------------------------------------------------------
 INSERT INTO customers (name, email, phone, address) VALUES
-('John Doe', 'john.doe@example.com', '9876543210', '123 Main Street, New York, NY'),
-('Alice Smith', 'alice.smith@example.com', '9123456789', '456 Oak Avenue, Los Angeles, CA'),
-('Robert Johnson', 'robert.j@example.com', '9988776655', '789 Pine Road, Chicago, IL');
+('Rajesh Kumar', 'rajesh.kumar@example.in', '+91 98765 43210', '12, MG Road, Indiranagar, Bengaluru, Karnataka 560038'),
+('Priya Sharma', 'priya.sharma@example.in', '+91 91234 56789', '45, Connaught Place, New Delhi 110001'),
+('Aarav Patel', 'aarav.patel@example.in', '+91 99887 76655', '88, Bandra West, Mumbai, Maharashtra 400050');
 
 INSERT INTO accounts (account_number, customer_id, account_type, balance) VALUES
-('SAV1001', 1, 'SAVINGS', 2500.00),
-('CUR1002', 1, 'CURRENT', 5000.00),
-('SAV1003', 2, 'SAVINGS', 1500.00),
-('CUR1004', 3, 'CURRENT', 3200.00);
+('SAV1001', 1, 'SAVINGS', 125000.00),
+('CUR1002', 1, 'CURRENT', 250000.00),
+('SAV2001', 2, 'SAVINGS', 340500.50),
+('CUR3001', 3, 'CURRENT', 85000.00);
 
 INSERT INTO transactions (account_number, transaction_type, amount, balance_after, target_account_number, remarks) VALUES
-('SAV1001', 'DEPOSIT', 2500.00, 2500.00, NULL, 'Initial Deposit'),
-('CUR1002', 'DEPOSIT', 5000.00, 5000.00, NULL, 'Initial Deposit'),
-('SAV1003', 'DEPOSIT', 1500.00, 1500.00, NULL, 'Initial Deposit'),
-('CUR1004', 'DEPOSIT', 3200.00, 3200.00, NULL, 'Initial Deposit');
+('SAV1001', 'DEPOSIT', 125000.00, 125000.00, NULL, 'Initial Account Opening Deposit'),
+('CUR1002', 'DEPOSIT', 300000.00, 300000.00, NULL, 'Initial Business Deposit'),
+('CUR1002', 'WITHDRAWAL', 50000.00, 250000.00, NULL, 'ATM Cash Withdrawal'),
+('SAV2001', 'DEPOSIT', 340500.50, 340500.50, NULL, 'Salary Credit'),
+('CUR3001', 'DEPOSIT', 85000.00, 85000.00, NULL, 'UPI Transfer Received');

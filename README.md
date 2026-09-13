@@ -1,6 +1,17 @@
-# 🏦 Banking Management System
+# 🏦 NovaBank India - Banking Management System & Web Dashboard
 
-A robust, multi-tier Java CLI Banking Management System built using standard Java Object-Oriented Programming (OOP) principles, Data Access Object (DAO) design patterns, and JDBC persistence with MySQL database.
+A robust, multi-tier Java Banking Management System with an ultra-modern **Vanilla JS Single Page Application (SPA) Web Dashboard** (built without React) and interactive CLI. Built using standard Java OOP principles, Data Access Object (DAO) patterns, embedded HTTP REST server, and JDBC persistence with MySQL.
+
+---
+
+## 🌐 Web Dashboard Highlights (No React)
+
+- **Indian Locale & INR Currency**: All financial metrics, statements, and transaction vouchers format using the Indian Rupee (`₹`) symbol and Indian numbering format (`₹8,00,500.50`).
+- **Dark Glassmorphism Design**: High-end UI with HSL color palettes, subtle glowing borders, backdrop filters, responsive navigation sidebar, and digital clock widget.
+- **Visual Analytics**: Interactive Chart.js doughnut chart for Savings vs Current account distribution and bar chart for transaction trends.
+- **Customer Directory**: Real-time customer search & filter with contact cards and registration modal.
+- **Financial Operations Hub**: Deposit, Withdraw (with minimum balance & overdraft validation rules), and Atomic Transfer (IMPS/UPI).
+- **Statement Audit Logs & CSV Export**: One-click CSV download of transaction statements and printable official receipt voucher generator.
 
 ---
 
@@ -11,128 +22,44 @@ Banking-Management-System/
 │
 ├── src/
 │   └── banking/
-│       │
-│       ├── model/
-│       │   ├── Customer.java            # Customer entity
-│       │   ├── Account.java             # Base abstract Account class
-│       │   ├── SavingsAccount.java      # Savings account (minimum balance rules & interest)
-│       │   ├── CurrentAccount.java      # Current account (overdraft limits)
-│       │   └── Transaction.java         # Financial transaction log model
-│       │
-│       ├── dao/
-│       │   ├── CustomerDAO.java         # Database CRUD operations for Customers
-│       │   ├── AccountDAO.java          # Database CRUD operations for Accounts
-│       │   └── TransactionDAO.java      # Database logging operations for Transactions
-│       │
-│       ├── service/
-│       │   ├── CustomerService.java     # Customer registration & validation business logic
-│       │   ├── AccountService.java      # Account opening, deposit, withdraw, transfer logic
-│       │   └── TransactionService.java  # Statement generation & history reporting logic
-│       │
-│       ├── util/
-│       │   ├── DBConnection.java        # JDBC Connection manager & connectivity diagnostics
-│       │   └── InputValidator.java      # Input validation & formatting helpers
-│       │
-│       └── Main.java                    # Application driver & interactive CLI user interface
+│       ├── model/             # Customer, Account, SavingsAccount, CurrentAccount, Transaction
+│       ├── dao/               # CustomerDAO, AccountDAO, TransactionDAO
+│       ├── service/           # CustomerService, AccountService, TransactionService
+│       ├── util/              # DBConnection, InputValidator
+│       ├── web/               # WebServer (Embedded HTTP REST API & Static File Server)
+│       └── Main.java          # CLI Application Driver & Web Server Launcher
+│
+├── web/
+│   ├── index.html             # Vanilla HTML5 SPA structure & modals
+│   ├── styles.css             # Modern Dark Glassmorphism CSS Design System
+│   └── app.js                 # Vanilla ES6 JS Logic & Chart.js integration
 │
 ├── database/
-│   └── banking.sql                      # SQL DDL & DML database setup script with seed data
+│   └── banking.sql            # SQL DDL & Indian Seed Data (Rajesh Kumar, Priya Sharma, Aarav Patel)
 │
-├── lib/
-│   └── mysql-connector-j.jar            # Place MySQL JDBC Connector Driver JAR here
-│
-├── README.md                            # Complete setup & usage guide
-└── .gitignore                           # Git ignore rules for Java compilation artifacts
+├── lib/                       # MySQL Connector JAR
+└── README.md
 ```
 
 ---
 
-## ✨ Key Features
+## 🚀 Setup & Running Guide
 
-1. **Customer Management**: Register new customers with email/phone format validation, search customer profile by ID/Email, and list all registered customers.
-2. **Account Management**: Open Savings Accounts (with $500 minimum balance enforcement) and Current Accounts (with $1,000 overdraft limit support).
-3. **Financial Operations**:
-   - **Deposit**: Secure deposit operations updating balances and logging transactions.
-   - **Withdrawal**: Polymorphic withdrawal logic validating balance constraints based on account type.
-   - **Fund Transfer**: Atomic multi-account transfers using SQL database transaction locks (`commit` / `rollback`) to prevent partial failures.
-4. **Statements & Audit Logs**: Detailed account statements formatted as ASCII tables showing deposits, withdrawals, transfers, target accounts, and timestamps.
-5. **Database Diagnostics**: Built-in connectivity test and configuration updater in the CLI menu.
+### 1. Compile Java Source Files
+From the project root directory:
 
----
-
-## 🛠️ Prerequisites
-
-- **Java Development Kit (JDK)**: Java 8 or higher (`javac` and `java` commands installed).
-- **MySQL Database Server**: MySQL Server 5.7+ or 8.0+ running on `localhost:3306`.
-- **MySQL JDBC Driver**: `mysql-connector-j-8.x.x.jar` downloaded into the `lib/` directory.
-
----
-
-## 🚀 Setup & Execution Guide
-
-### Step 1: Database Setup
-1. Open your MySQL client (Command Line or Workbench).
-2. Execute the `database/banking.sql` script to create the database, tables, and pre-populated seed data:
-   ```bash
-   mysql -u root -p < database/banking.sql
-   ```
-   *Or copy and paste the contents of `database/banking.sql` into MySQL Workbench.*
-
-### Step 2: Download MySQL JDBC Driver
-1. Download MySQL Connector/J driver (JAR file) from [MySQL Official Website](https://dev.mysql.com/downloads/connector/j/).
-2. Place `mysql-connector-j-8.x.x.jar` inside the `lib/` directory as `lib/mysql-connector-j.jar`.
-
-### Step 3: Compilation
-From the project root directory, compile all Java source files into a `bin/` directory:
-
-#### On Windows (Command Prompt / PowerShell):
 ```cmd
-javac -cp "lib/mysql-connector-j.jar;lib/*" -d bin src/banking/model/*.java src/banking/util/*.java src/banking/dao/*.java src/banking/service/*.java src/banking/Main.java
+javac -cp "lib/*" -d bin src/banking/model/*.java src/banking/util/*.java src/banking/dao/*.java src/banking/service/*.java src/banking/web/*.java src/banking/Main.java
 ```
 
-#### On Linux / macOS:
-```bash
-javac -cp "lib/mysql-connector-j.jar:lib/*" -d bin src/banking/model/*.java src/banking/util/*.java src/banking/dao/*.java src/banking/service/*.java src/banking/Main.java
-```
-
----
-
-### Step 4: Running the Application
-
-#### On Windows (Command Prompt / PowerShell):
+### 2. Launch Web Server Mode
 ```cmd
-java -cp "bin;lib/mysql-connector-j.jar;lib/*" banking.Main
+java -cp "bin;lib/*" banking.Main --web
 ```
+Open **[http://localhost:8080](http://localhost:8080)** in your browser!
 
-#### On Linux / macOS:
-```bash
-java -cp "bin:lib/mysql-connector-j.jar:lib/*" banking.Main
+### 3. Launch CLI Mode
+```cmd
+java -cp "bin;lib/*" banking.Main
 ```
-
----
-
-## 💻 CLI Menu Overview
-
-```text
-==========================================================
-           🏦 BANKING MANAGEMENT SYSTEM 🏦               
-==========================================================
-
----------------- MAIN MENU ----------------
-1. Customer Management
-2. Account Management
-3. Financial Operations (Deposit / Withdraw / Transfer)
-4. Account Statements & Transaction History
-5. Database Connection Diagnostics
-6. Exit
-```
-
----
-
-## 📝 Default Database Configuration
-
-- **Database URL**: `jdbc:mysql://localhost:3306/banking_db`
-- **Username**: `root`
-- **Password**: `password`
-
-*(Note: You can update credentials at runtime via **Option 5: Database Connection Diagnostics** in the application menu, or directly edit `src/banking/util/DBConnection.java`)*.
+Select **Option 6** from the CLI menu to launch the Web Server.

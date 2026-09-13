@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaBank India - Banking Management Dashboard</title>
+  <meta name="description" content="Next-generation Indian Banking Management System Web Dashboard featuring real-time financial tracking, account opening, atomic transfers, and statement audit logs.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for Visual Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"/>
+            <path d="M3 10h18"/>
+            <path d="M5 6l7-3 7 3"/>
+            <path d="M4 10v11"/>
+            <path d="M20 10v11"/>
+            <path d="M8 14v3"/>
+            <path d="M12 14v3"/>
+            <path d="M16 14v3"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h2>NovaBank</h2>
+          <span>India Core</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-btn active" data-tab="dashboard" id="nav-item-dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-btn" data-tab="customers" id="nav-item-customers">
+          <i data-lucide="users"></i>
+          <span>Customers</span>
+        </button>
+        <button class="nav-btn" data-tab="accounts" id="nav-item-accounts">
+          <i data-lucide="credit-card"></i>
+          <span>Accounts</span>
+        </button>
+        <button class="nav-btn" data-tab="operations" id="nav-item-operations">
+          <i data-lucide="arrow-left-right"></i>
+          <span>Operations</span>
+        </button>
+        <button class="nav-btn" data-tab="statements" id="nav-item-statements">
+          <i data-lucide="receipt"></i>
+          <span>Statements</span>
+        </button>
+        <button class="nav-btn" data-tab="diagnostics" id="nav-item-diagnostics">
+          <i data-lucide="database"></i>
+          <span>System & DB</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="db-pill" id="db-status-pill">
+          <span class="pulse-dot"></span>
+          <span id="db-status-text">Checking DB...</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+      <!-- HEADER -->
+      <header class="top-header">
+        <div class="header-title">
+          <h1 id="page-title">Dashboard Overview</h1>
+          <p id="page-subtitle">Real-time financial activity, portfolio distribution, and management</p>
+        </div>
+        <div class="header-actions">
+          <div class="time-widget" id="clock-widget">--:--:--</div>
+          <button class="btn btn-secondary icon-btn" id="refresh-btn" title="Refresh Live Data" aria-label="Refresh Data">
+            <i data-lucide="rotate-cw"></i>
+          </button>
+          <button class="btn btn-primary" id="quick-action-btn">
+            <i data-lucide="plus"></i> New Operation
+          </button>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- TOAST CONTAINER -->
+        <div id="toast-container"></div>
+
+        <!-- 1. DASHBOARD TAB -->
+        <section id="tab-dashboard" class="tab-pane active">
+          <!-- KPI SUMMARY GRID -->
+          <div class="stats-grid">
+            <div class="stat-card cyan">
+              <div class="stat-icon"><i data-lucide="wallet"></i></div>
+              <div class="stat-data">
+                <span class="stat-label">Total Deposits Balance (INR)</span>
+                <h3 class="stat-value" id="stat-balance">₹0.00</h3>
+              </div>
+            </div>
+            <div class="stat-card indigo">
+              <div class="stat-icon"><i data-lucide="users"></i></div>
+              <div class="stat-data">
+                <span class="stat-label">Total Registered Customers</span>
+                <h3 class="stat-value" id="stat-customers">0</h3>
+              </div>
+            </div>
+            <div class="stat-card emerald">
+              <div class="stat-icon"><i data-lucide="credit-card"></i></div>
+              <div class="stat-data">
+                <span class="stat-label">Active Bank Accounts</span>
+                <h3 class="stat-value" id="stat-accounts">0</h3>
+              </div>
+            </div>
+            <div class="stat-card rose">
+              <div class="stat-icon"><i data-lucide="activity"></i></div>
+              <div class="stat-data">
+                <span class="stat-label">Processed Transactions</span>
+                <h3 class="stat-value" id="stat-txs">0</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- ANALYTICS & CHARTS ROW -->
+          <div class="charts-grid mb-4">
+            <div class="card glass-card">
+              <div class="card-header">
+                <h3><i data-lucide="pie-chart"></i> Account Type Distribution</h3>
+              </div>
+              <div class="card-body chart-box">
+                <canvas id="chart-balance-types"></canvas>
+              </div>
+            </div>
+            <div class="card glass-card">
+              <div class="card-header">
+                <h3><i data-lucide="bar-chart-3"></i> Transaction Activity Trend</h3>
+              </div>
+              <div class="card-body chart-box">
+                <canvas id="chart-tx-activity"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- DASHBOARD LOWER GRID -->
+          <div class="dashboard-grid">
+            <!-- QUICK TRANSFER CARD -->
+            <div class="card glass-card">
+              <div class="card-header">
+                <h3><i data-lucide="zap"></i> Instant Fund Transfer (UPI/IMPS)</h3>
+              </div>
+              <div class="card-body">
+                <form id="quick-transfer-form">
+                  <div class="form-group">
+                    <label for="qt-from-account">From Source Account</label>
+                    <select id="qt-from-account" class="form-control account-dropdown" required>
+                      <option value="">Select source account...</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="qt-to-account">To Target Account Number</label>
+                    <input type="text" id="qt-to-account" class="form-control" placeholder="e.g. SAV1001 or CUR1002" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="qt-amount">Transfer Amount (₹)</label>
+                    <input type="number" id="qt-amount" class="form-control" step="0.01" min="0.01" placeholder="₹0.00" required>
+                  </div>
+                  <button type="submit" class="btn btn-gradient btn-block">
+                    <i data-lucide="send"></i> Execute Transfer
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- RECENT TRANSACTIONS FEED -->
+            <div class="card glass-card span-2">
+              <div class="card-header flex-between">
+                <h3><i data-lucide="history"></i> Recent Transactions Log</h3>
+                <button class="btn-link" onclick="switchTab('statements')">View All &rarr;</button>
+              </div>
+              <div class="card-body padding-none">
+                <div class="table-responsive">
+                  <table class="data-table" id="recent-tx-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Account #</th>
+                        <th>Type</th>
+                        <th>Amount (₹)</th>
+                        <th>Balance After</th>
+                        <th>Timestamp</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recent-tx-tbody">
+                      <tr><td colspan="6" class="text-center py-4">Loading transaction history...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. CUSTOMERS TAB -->
+        <section id="tab-customers" class="tab-pane">
+          <div class="actionBar flex-between mb-4">
+            <div class="search-box">
+              <i data-lucide="search"></i>
+              <input type="text" id="customer-search-input" placeholder="Search customer by name, email, mobile, or ID...">
+            </div>
+            <button class="btn btn-primary" onclick="openModal('modal-add-customer')">
+              <i data-lucide="user-plus"></i> Register New Customer
+            </button>
+          </div>
+
+          <div class="grid-cards" id="customers-cards-grid">
+            <!-- Dynamically populated customer cards -->
+          </div>
+        </section>
+
+        <!-- 3. ACCOUNTS TAB -->
+        <section id="tab-accounts" class="tab-pane">
+          <div class="actionBar flex-between mb-4">
+            <div class="search-box">
+              <i data-lucide="search"></i>
+              <input type="text" id="account-search-input" placeholder="Search accounts by number, type, customer ID...">
+            </div>
+            <button class="btn btn-primary" onclick="openModal('modal-open-account')">
+              <i data-lucide="plus-circle"></i> Open New Account
+            </button>
+          </div>
+
+          <div class="card glass-card">
+            <div class="card-body padding-none">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Account #</th>
+                      <th>Customer ID</th>
+                      <th>Account Type</th>
+                      <th>Balance (₹)</th>
+                      <th>Created Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="accounts-table-body">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. OPERATIONS TAB -->
+        <section id="tab-operations" class="tab-pane">
+          <div class="operations-wrapper">
+            <div class="ops-tabs">
+              <button class="ops-tab-btn active" data-op="deposit">
+                <i data-lucide="arrow-down-left"></i> Deposit Cash
+              </button>
+              <button class="ops-tab-btn" data-op="withdraw">
+                <i data-lucide="arrow-up-right"></i> Withdraw Cash
+              </button>
+              <button class="ops-tab-btn" data-op="transfer">
+                <i data-lucide="repeat"></i> Transfer Funds
+              </button>
+            </div>
+
+            <!-- DEPOSIT FORM -->
+            <div id="op-form-deposit" class="op-form-pane active card glass-card">
+              <h3>Deposit Cash into Account</h3>
+              <form id="form-deposit">
+                <div class="form-group">
+                  <label for="dep-account">Target Account</label>
+                  <select id="dep-account" class="form-control account-dropdown" required></select>
+                </div>
+                <div class="form-group">
+                  <label for="dep-amount">Deposit Amount (₹)</label>
+                  <input type="number" id="dep-amount" class="form-control" step="0.01" min="0.01" placeholder="₹0.00" required>
+                </div>
+                <div class="form-group">
+                  <label for="dep-remarks">Remarks / Note (Optional)</label>
+                  <input type="text" id="dep-remarks" class="form-control" placeholder="e.g. Monthly salary deposit">
+                </div>
+                <button type="submit" class="btn btn-success btn-block btn-lg">
+                  <i data-lucide="check-circle"></i> Process Deposit
+                </button>
+              </form>
+            </div>
+
+            <!-- WITHDRAW FORM -->
+            <div id="op-form-withdraw" class="op-form-pane card glass-card">
+              <h3>Withdraw Cash from Account</h3>
+              <form id="form-withdraw">
+                <div class="form-group">
+                  <label for="wd-account">Source Account</label>
+                  <select id="wd-account" class="form-control account-dropdown" required></select>
+                </div>
+                <div class="form-group">
+                  <label for="wd-amount">Withdrawal Amount (₹)</label>
+                  <input type="number" id="wd-amount" class="form-control" step="0.01" min="0.01" placeholder="₹0.00" required>
+                </div>
+                <div class="form-group">
+                  <label for="wd-remarks">Remarks / Note (Optional)</label>
+                  <input type="text" id="wd-remarks" class="form-control" placeholder="e.g. ATM cash withdrawal">
+                </div>
+                <div class="info-banner warning-banner mb-3">
+                  <i data-lucide="alert-triangle"></i>
+                  <span>Rules: Savings Account requires minimum ₹500 balance. Current Account supports up to ₹1,000 overdraft limit.</span>
+                </div>
+                <button type="submit" class="btn btn-rose btn-block btn-lg">
+                  <i data-lucide="arrow-up-right"></i> Process Withdrawal
+                </button>
+              </form>
+            </div>
+
+            <!-- TRANSFER FORM -->
+            <div id="op-form-transfer" class="op-form-pane card glass-card">
+              <h3>Atomic Fund Transfer (NEFT/RTGS/IMPS)</h3>
+              <form id="form-transfer">
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label for="tf-from-account">From Source Account</label>
+                    <select id="tf-from-account" class="form-control account-dropdown" required></select>
+                  </div>
+                  <div class="form-group">
+                    <label for="tf-to-account">To Destination Account</label>
+                    <select id="tf-to-account" class="form-control account-dropdown" required></select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="tf-amount">Transfer Amount (₹)</label>
+                  <input type="number" id="tf-amount" class="form-control" step="0.01" min="0.01" placeholder="₹0.00" required>
+                </div>
+                <div class="form-group">
+                  <label for="tf-remarks">Transfer Note / Remarks</label>
+                  <input type="text" id="tf-remarks" class="form-control" placeholder="e.g. Rent payment transfer">
+                </div>
+                <button type="submit" class="btn btn-gradient btn-block btn-lg">
+                  <i data-lucide="send"></i> Execute Fund Transfer
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. STATEMENTS TAB -->
+        <section id="tab-statements" class="tab-pane">
+          <div class="card glass-card mb-4">
+            <div class="card-body">
+              <form id="statement-filter-form" class="filter-row">
+                <div class="form-group flex-1">
+                  <label for="stmt-account-select">Filter by Account Number</label>
+                  <select id="stmt-account-select" class="form-control account-dropdown">
+                    <option value="">-- All System Accounts --</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <div class="button-group flex-gap">
+                    <button type="submit" class="btn btn-primary">
+                      <i data-lucide="filter"></i> Generate Statement
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="export-csv-btn" title="Export Statement to CSV">
+                      <i data-lucide="download"></i> Export CSV
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card glass-card">
+            <div class="card-header flex-between">
+              <h3 id="stmt-heading"><i data-lucide="list"></i> Transaction Statement Audit Log</h3>
+              <button class="btn btn-secondary icon-btn" id="print-stmt-btn" title="Print Receipt / Statement" aria-label="Print Statement">
+                <i data-lucide="printer"></i>
+              </button>
+            </div>
+            <div class="card-body padding-none">
+              <div class="table-responsive">
+                <table class="data-table" id="statement-table">
+                  <thead>
+                    <tr>
+                      <th>Tx ID</th>
+                      <th>Account #</th>
+                      <th>Type</th>
+                      <th>Amount (₹)</th>
+                      <th>Balance After</th>
+                      <th>Target Account</th>
+                      <th>Remarks</th>
+                      <th>Timestamp</th>
+                    </tr>
+                  </thead>
+                  <tbody id="statement-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. DIAGNOSTICS TAB -->
+        <section id="tab-diagnostics" class="tab-pane">
+          <div class="grid-2">
+            <div class="card glass-card">
+              <div class="card-header">
+                <h3><i data-lucide="cpu"></i> MySQL Database Connectivity Diagnostics</h3>
+              </div>
+              <div class="card-body text-center py-5">
+                <div class="status-indicator-box" id="diag-status-box">
+                  <div class="status-icon-circle green" id="diag-icon-circle">
+                    <i data-lucide="database"></i>
+                  </div>
+                  <h2 id="diag-status-title">Checking Database...</h2>
+                  <p id="diag-status-desc">Validating connection to MySQL Server on localhost:3306</p>
+                </div>
+                <button class="btn btn-secondary mt-4" id="test-db-btn">
+                  <i data-lucide="refresh-cw"></i> Run Connection Diagnostics Now
+                </button>
+              </div>
+            </div>
+
+            <div class="card glass-card">
+              <div class="card-header">
+                <h3><i data-lucide="settings"></i> Database Configuration Editor</h3>
+              </div>
+              <div class="card-body">
+                <form id="db-config-form">
+                  <div class="form-group">
+                    <label for="db-url-input">JDBC URL</label>
+                    <input type="text" id="db-url-input" class="form-control" value="jdbc:mysql://localhost:3306/banking_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC">
+                  </div>
+                  <div class="form-group">
+                    <label for="db-user-input">Database User</label>
+                    <input type="text" id="db-user-input" class="form-control" value="root">
+                  </div>
+                  <div class="form-group">
+                    <label for="db-pass-input">Database Password</label>
+                    <input type="password" id="db-pass-input" class="form-control" placeholder="••••••••">
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">
+                    <i data-lucide="save"></i> Update Credentials & Reconnect
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL OVERLAYS -->
+
+  <!-- 1. REGISTER CUSTOMER MODAL -->
+  <div class="modal-overlay" id="modal-add-customer">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i data-lucide="user-plus"></i> Register New Customer</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-customer')" aria-label="Close Modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-customer">
+          <div class="form-group">
+            <label for="cust-name">Full Name *</label>
+            <input type="text" id="cust-name" class="form-control" placeholder="e.g. Rajesh Kumar" required>
+          </div>
+          <div class="form-group">
+            <label for="cust-email">Email Address *</label>
+            <input type="email" id="cust-email" class="form-control" placeholder="rajesh.kumar@example.in" required>
+          </div>
+          <div class="form-group">
+            <label for="cust-phone">Mobile Number *</label>
+            <input type="text" id="cust-phone" class="form-control" placeholder="+91 98765 43210" required>
+          </div>
+          <div class="form-group">
+            <label for="cust-address">Physical Address</label>
+            <textarea id="cust-address" class="form-control" rows="3" placeholder="12, MG Road, Indiranagar, Bengaluru, Karnataka 560038"></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-customer')">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Register Customer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. OPEN ACCOUNT MODAL -->
+  <div class="modal-overlay" id="modal-open-account">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i data-lucide="plus-circle"></i> Open New Bank Account</h3>
+        <button class="modal-close" onclick="closeModal('modal-open-account')" aria-label="Close Modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-open-account">
+          <div class="form-group">
+            <label for="acc-customer-select">Select Customer *</label>
+            <select id="acc-customer-select" class="form-control" required>
+              <option value="">Select customer...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="acc-type-select">Account Type *</label>
+            <select id="acc-type-select" class="form-control" required>
+              <option value="SAVINGS">Savings Account (Min ₹500 Balance Enforcement)</option>
+              <option value="CURRENT">Current Account (₹1,000 Overdraft Limit)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="acc-deposit-input">Initial Deposit Amount (₹) *</label>
+            <input type="number" id="acc-deposit-input" class="form-control" step="0.01" min="0" placeholder="500.00" required>
+            <small class="form-hint" id="deposit-hint">Savings Account requires at least ₹500 initial deposit.</small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-open-account')">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i data-lucide="check-circle"></i> Open Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TRANSACTION RECEIPT MODAL -->
+  <div class="modal-overlay" id="modal-receipt">
+    <div class="modal-box receipt-modal">
+      <div class="modal-header">
+        <h3><i data-lucide="receipt"></i> Official Transaction Voucher</h3>
+        <button class="modal-close" onclick="closeModal('modal-receipt')" aria-label="Close Modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="receipt-card" id="receipt-print-area">
+          <div class="receipt-header">
+            <h2>🏦 NOVABANK INDIA</h2>
+            <p>Official Financial Receipt & Audit Trail</p>
+            <span class="badge badge-success" id="rcpt-type">DEPOSIT</span>
+          </div>
+          <div class="receipt-divider"></div>
+          <div class="receipt-details">
+            <div class="rcpt-row">
+              <span>Account Number:</span>
+              <strong id="rcpt-acc-no">SAV1001</strong>
+            </div>
+            <div class="rcpt-row">
+              <span>Transaction Amount:</span>
+              <strong class="text-green" id="rcpt-amount">₹0.00</strong>
+            </div>
+            <div class="rcpt-row">
+              <span>Available Balance:</span>
+              <strong id="rcpt-balance">₹0.00</strong>
+            </div>
+            <div class="rcpt-row" id="rcpt-target-row">
+              <span>Target Account:</span>
+              <strong id="rcpt-target-acc">-</strong>
+            </div>
+            <div class="rcpt-row">
+              <span>Remarks:</span>
+              <span id="rcpt-remarks">Regular Transaction</span>
+            </div>
+            <div class="rcpt-row">
+              <span>Date & Time:</span>
+              <span id="rcpt-time">--</span>
+            </div>
+          </div>
+          <div class="receipt-footer">
+            <p>Authorized by NovaBank Core Engine (India).</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="window.print()"><i data-lucide="printer"></i> Print Receipt</button>
+          <button class="btn btn-primary" onclick="closeModal('modal-receipt')">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Main JavaScript Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

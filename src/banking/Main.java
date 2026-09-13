@@ -22,6 +22,11 @@ public class Main {
     private static TransactionService transactionService;
 
     public static void main(String[] args) {
+        if (args.length > 0 && "--web".equalsIgnoreCase(args[0])) {
+            banking.web.WebServer.startServer();
+            return;
+        }
+
         customerService = new CustomerService();
         accountService = new AccountService();
         transactionService = new TransactionService();
@@ -51,11 +56,15 @@ public class Main {
                     handleDatabaseConfigMenu();
                     break;
                 case "6":
+                    System.out.println("\n🌐 Starting Web Server...");
+                    banking.web.WebServer.startServer();
+                    break;
+                case "7":
                     System.out.println("\nThank you for using Banking Management System. Goodbye!");
                     running = false;
                     break;
                 default:
-                    System.out.println("❌ Invalid option. Please select a number from 1 to 6.");
+                    System.out.println("❌ Invalid option. Please select a number from 1 to 7.");
             }
         }
         scanner.close();
@@ -85,8 +94,9 @@ public class Main {
         System.out.println("3. Financial Operations (Deposit / Withdraw / Transfer)");
         System.out.println("4. Account Statements & Transaction History");
         System.out.println("5. Database Connection Diagnostics");
-        System.out.println("6. Exit");
-        System.out.print("Select an option (1-6): ");
+        System.out.println("6. 🌐 Launch Web UI Dashboard (http://localhost:8080)");
+        System.out.println("7. Exit");
+        System.out.print("Select an option (1-7): ");
     }
 
     // =========================================================================
