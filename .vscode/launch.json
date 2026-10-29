@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "com.bank.Main",
+            "projectName": "banking management project_fae3f43c"
+        },
+        {
+            "type": "java",
+            "name": "Run Banking Management System",
+            "request": "launch",
+            "mainClass": "com.bank.Main",
+            "projectName": "banking management project",
+            "javaExec": "C:\\Program Files\\Java\\jdk-21.0.10\\bin\\java.exe",
+            "classPaths": [
+                "${workspaceFolder}/bin",
+                "${workspaceFolder}/lib/mysql-connector-j.jar",
+                "${workspaceFolder}/lib/h2.jar"
+            ]
+        }
+    ]
+}
